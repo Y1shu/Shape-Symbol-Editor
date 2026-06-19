@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shape Symbol Editor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e8e8f0; font-family: 'Courier New', monospace; }
+  ::-webkit-scrollbar { width: 6px; } 
+  ::-webkit-scrollbar-track { background: #1a1a3e; }
+  ::-webkit-scrollbar-thumb { background: #3333aa; border-radius: 3px; }
+  input, select, textarea { outline: none; }
+  input[type=color] { padding: 2px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const SHAPES = [
+  { id:1, name:"Shape-1", cat:"Vehicle", desc:"Sedan Car",
+    svg:`<svg viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="30" width="100" height="25" rx="4" stroke="currentColor" stroke-width="2.5"/>
+      <path d="M25 30 L35 15 L80 15 L95 30" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="30" cy="57" r="9" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="30" cy="57" r="4" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="90" cy="57" r="9" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="90" cy="57" r="4" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="45" y1="15" x2="45" y2="30" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="72" y1="15" x2="72" y2="30" stroke="currentColor" stroke-width="1.5"/>
+    </svg>`},
+  { id:2, name:"Shape-2", cat:"Vehicle", desc:"SUV / Jeep",
+    svg:`<svg viewBox="0 0 130 75" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="28" width="114" height="28" rx="6" stroke="currentColor" stroke-width="2.5"/>
+      <rect x="18" y="10" width="94" height="20" rx="5" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="30" cy="58" r="10" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="30" cy="58" r="4" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="100" cy="58" r="10" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="100" cy="58" r="4" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="65" y1="10" x2="65" y2="28" stroke="currentColor" stroke-width="1.5"/>
+    </svg>`},
+  { id:3, name:"Shape-3", cat:"Animal", desc:"Cartoon Bunny",
+    svg:`<svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="75" rx="28" ry="28" stroke="currentColor" stroke-width="2"/>
+      <ellipse cx="50" cy="45" rx="18" ry="20" stroke="currentColor" stroke-width="2"/>
+      <path d="M35 30 Q30 10 33 5 Q36 2 38 8 Q40 15 40 28" stroke="currentColor" stroke-width="2"/>
+      <path d="M65 30 Q70 10 67 5 Q64 2 62 8 Q60 15 60 28" stroke="currentColor" stroke-width="2"/>
+      <circle cx="43" cy="42" r="3" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="57" cy="42" r="3" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="44" cy="43" r="1.5" fill="currentColor"/>
+      <circle cx="58" cy="43" r="1.5" fill="currentColor"/>
+      <ellipse cx="50" cy="50" rx="5" ry="3" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M30 80 Q20 85 18 95 Q25 98 35 90" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M70 80 Q80 85 82 95 Q75 98 65 90" stroke="currentColor" stroke-width="1.5"/>
+    </svg>`},
+  { id:4, name:"Shape-4", cat:"Animal", desc:"Friendly Ghost",
+    svg:`<svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 55 Q20 25 50 20 Q80 25 80 55 L80 95 Q72 88 65 95 Q57 88 50 95 Q43 88 35 95 Q28 88 20 95 Z" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="40" cy="50" r="6" stroke="currentColor" stroke-width="2"/>
+      <circle cx="60" cy="50" r="6" stroke="currentColor" stroke-width="2"/>
+      <circle cx="41" cy="51" r="2.5" fill="currentColor"/>
+      <circle cx="61" cy="51" r="2.5" fill="currentColor"/>
+      <path d="M40 62 Q50 70 60 62" stroke="currentColor" stroke-width="2"/>
+    </svg>`},
+  { id:5, name:"Shape-5", cat:"P&ID", desc:"Vertical Vessel — PV-1000", tag:"PV-1000",
+    svg:`<svg viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="20" width="40" height="70" stroke="currentColor" stroke-width="2"/>
+      <path d="M20 20 Q40 10 60 20" stroke="currentColor" stroke-width="2"/>
+      <path d="M20 90 Q40 100 60 90" stroke="currentColor" stroke-width="2"/>
+      <text x="40" y="58" text-anchor="middle" font-size="8" fill="currentColor" font-family="monospace">PV-1000</text>
+    </svg>`},
+  { id:6, name:"Shape-6", cat:"P&ID", desc:"Instrument Cluster — PIC/PT/PE", tag:"PIC-101",
+    svg:`<svg viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="22" y="8" width="36" height="24" rx="2" stroke="currentColor" stroke-width="2"/>
+      <text x="40" y="18" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">PIC</text>
+      <text x="40" y="27" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">101</text>
+      <line x1="40" y1="32" x2="40" y2="45" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="40" cy="53" r="10" stroke="currentColor" stroke-width="2"/>
+      <text x="40" y="57" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">PT 102</text>
+      <line x1="40" y1="63" x2="40" y2="76" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="40" cy="84" r="10" stroke="currentColor" stroke-width="2"/>
+      <text x="40" y="88" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">PE 100</text>
+    </svg>`},
+  { id:7, name:"Shape-7", cat:"P&ID", desc:"Hex Valve — HEX-300", tag:"HEX-300",
+    svg:`<svg viewBox="0 0 70 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="22" y="20" width="26" height="50" stroke="currentColor" stroke-width="2"/>
+      <line x1="22" y1="35" x2="48" y2="35" stroke="currentColor" stroke-width="1"/>
+      <line x1="22" y1="50" x2="48" y2="50" stroke="currentColor" stroke-width="1"/>
+      <line x1="35" y1="20" x2="35" y2="70" stroke="currentColor" stroke-width="1"/>
+      <path d="M30 20 L35 10 L40 20" stroke="currentColor" stroke-width="2"/>
+      <text x="35" y="85" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">HEX-300</text>
+    </svg>`},
+  { id:8, name:"Shape-8", cat:"P&ID", desc:"Heat Exchanger Grid",
+    svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="20" width="70" height="50" stroke="currentColor" stroke-width="2"/>
+      <line x1="10" y1="35" x2="80" y2="35" stroke="currentColor" stroke-width="1"/>
+      <line x1="10" y1="50" x2="80" y2="50" stroke="currentColor" stroke-width="1"/>
+      <line x1="27" y1="20" x2="27" y2="70" stroke="currentColor" stroke-width="1"/>
+      <line x1="44" y1="20" x2="44" y2="70" stroke="currentColor" stroke-width="1"/>
+      <line x1="61" y1="20" x2="61" y2="70" stroke="currentColor" stroke-width="1"/>
+      <path d="M10 20 L80 70 M80 20 L10 70" stroke="currentColor" stroke-width="1.5"/>
+    </svg>`},
+  { id:9, name:"Shape-9", cat:"Valve", desc:"Gate Valve — P-XXX", tag:"P-XXX",
+    svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="38" r="26" stroke="currentColor" stroke-width="2"/>
+      <path d="M14 38 L66 38" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M40 12 L40 64" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M22 20 L58 56 M58 20 L22 56" stroke="currentColor" stroke-width="1"/>
+      <text x="40" y="74" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">P-XXX</text>
+    </svg>`},
+  { id:10, name:"Shape-10", cat:"Valve", desc:"Globe Valve — P-XXX", tag:"P-XXX",
+    svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="40,12 65,26 65,54 40,68 15,54 15,26" stroke="currentColor" stroke-width="2"/>
+      <path d="M15 40 L65 40" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M40 12 L40 68" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="40" cy="40" r="6" stroke="currentColor" stroke-width="1.5"/>
+      <text x="40" y="76" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">P-XXX</text>
+    </svg>`},
+  { id:11, name:"Shape-11", cat:"Valve", desc:"Ball Valve — P-XXX", tag:"P-XXX",
+    svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="38" r="24" stroke="currentColor" stroke-width="2"/>
+      <path d="M16 38 L64 38" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M22 20 L58 56" stroke="currentColor" stroke-width="1.5"/>
+      <ellipse cx="40" cy="28" rx="14" ry="7" stroke="currentColor" stroke-width="1.5"/>
+      <text x="40" y="72" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">P-XXX</text>
+    </svg>`},
+  { id:12, name:"Shape-12", cat:"Valve", desc:"Butterfly / Check Valve",
+    svg:`<svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="35" cy="35" r="26" stroke="currentColor" stroke-width="2"/>
+      <path d="M35 9 L35 61" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M35 35 Q22 27 12 35 Q22 43 35 35Z" stroke="currentColor" stroke-width="1" fill="currentColor" fill-opacity="0.3"/>
+    </svg>`},
+  { id:13, name:"Shape-13", cat:"P&ID", desc:"Strainer / Filter — HEX-500", tag:"HEX-500",
+    svg:`<svg viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="15" width="80" height="24" stroke="currentColor" stroke-width="2"/>
+      <line x1="10" y1="24" x2="90" y2="24" stroke="currentColor" stroke-width="1"/>
+      <line x1="10" y1="31" x2="90" y2="31" stroke="currentColor" stroke-width="1"/>
+      <line x1="25" y1="15" x2="25" y2="39" stroke="currentColor" stroke-width="1"/>
+      <line x1="40" y1="15" x2="40" y2="39" stroke="currentColor" stroke-width="1"/>
+      <line x1="55" y1="15" x2="55" y2="39" stroke="currentColor" stroke-width="1"/>
+      <line x1="70" y1="15" x2="70" y2="39" stroke="currentColor" stroke-width="1"/>
+      <text x="50" y="53" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">HEX-500</text>
+    </svg>`},
+  { id:14, name:"Shape-14", cat:"Valve", desc:"Control Valve — XV-200", tag:"XV-200",
+    svg:`<svg viewBox="0 0 70 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="35" cy="18" r="10" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="35" y1="28" x2="35" y2="45" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M15 45 L55 45 L35 68 Z" stroke="currentColor" stroke-width="2"/>
+      <path d="M15 68 L55 68 L35 45 Z" stroke="currentColor" stroke-width="2"/>
+      <line x1="5" y1="57" x2="15" y2="57" stroke="currentColor" stroke-width="2"/>
+      <line x1="55" y1="57" x2="65" y2="57" stroke="currentColor" stroke-width="2"/>
+      <text x="35" y="88" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">XV-200</text>
+    </svg>`},
+  { id:15, name:"Shape-15", cat:"Valve", desc:"Actuated Valve Open — XV-200", tag:"XV-200",
+    svg:`<svg viewBox="0 0 70 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="35" cy="18" r="10" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="25" y1="10" x2="45" y2="10" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="35" y1="28" x2="35" y2="45" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M15 45 L55 45 L35 68 Z" stroke="currentColor" stroke-width="2"/>
+      <path d="M15 68 L55 68 L35 45 Z" stroke="currentColor" stroke-width="2"/>
+      <line x1="5" y1="57" x2="15" y2="57" stroke="currentColor" stroke-width="2"/>
+      <line x1="55" y1="57" x2="65" y2="57" stroke="currentColor" stroke-width="2"/>
+      <text x="35" y="88" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">XV-200</text>
+    </svg>`},
+  { id:16, name:"Shape-16", cat:"Valve", desc:"Actuated Valve Closed — XV-200", tag:"XV-200",
+    svg:`<svg viewBox="0 0 70 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="35" cy="18" r="10" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="28" y1="11" x2="42" y2="25" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="42" y1="11" x2="28" y2="25" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="35" y1="28" x2="35" y2="45" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M15 45 L55 45 L35 68 Z" stroke="currentColor" stroke-width="2"/>
+      <path d="M15 68 L55 68 L35 45 Z" stroke="currentColor" stroke-width="2"/>
+      <line x1="5" y1="57" x2="15" y2="57" stroke="currentColor" stroke-width="2"/>
+      <line x1="55" y1="57" x2="65" y2="57" stroke="currentColor" stroke-width="2"/>
+      <text x="35" y="88" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">XV-200</text>
+    </svg>`},
+];
+
+const CATS = ["All","Vehicle","Animal","P&ID","Valve"];
+const FIELDS = [
+  {key:"tag", label:"Tag / ID", ph:"e.g. PV-1000"},
+  {key:"material", label:"Material", ph:"e.g. Carbon Steel"},
+  {key:"size", label:"Size", ph:"e.g. 6 inch"},
+  {key:"pressure", label:"Pressure Rating", ph:"e.g. 150 PSI"},
+  {key:"color", label:"Symbol Color", type:"color"},
+  {key:"status", label:"Status", type:"select", opts:["Active","Inactive","Maintenance","Decommissioned"]},
+  {key:"notes", label:"Notes", ph:"Additional info...", type:"textarea"},
+];
+
+const initProps = () => ({tag:"",material:"",size:"",pressure:"",color:"#6666ff",status:"Active",notes:""});
+
+function App() {
+  const [shapes, setShapes] = React.useState(
+    SHAPES.map(s => ({...s, props: {...initProps(), tag: s.tag||""}}))
+  );
+  const [sel, setSel] = React.useState(null);
+  const [cat, setCat] = React.useState("All");
+  const [search, setSearch] = React.useState("");
+  const [tab, setTab] = React.useState("props");
+
+  const shape = sel !== null ? shapes[sel] : null;
+
+  const filtered = shapes.filter(s =>
+    (cat==="All" || s.cat===cat) &&
+    (!search || s.name.toLowerCase().includes(search.toLowerCase()) || s.desc.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const setProp = (k,v) => {
+    if(sel===null) return;
+    setShapes(prev => prev.map((s,i) => i===sel ? {...s, props:{...s.props,[k]:v}} : s));
+  };
+
+  const exportJSON = () => {
+    const d = JSON.stringify(shapes.map(s=>({id:s.id,name:s.name,category:s.cat,description:s.desc,properties:s.props})),null,2);
+    const a = document.createElement("a");
+    a.href = "data:application/json;charset=utf-8,"+encodeURIComponent(d);
+    a.download = "shapes-export.json"; a.click();
+  };
+
+  const S = {
+    header:{background:"linear-gradient(135deg,#1a1a3e,#0f0f1a)",borderBottom:"1px solid #2a2a5a",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"10px"},
+    btn:(active)=>({background:active?"#3333aa":"#1a1a3e",border:`1px solid ${active?"#6666ff":"#3333aa"}`,borderRadius:"6px",padding:"4px 10px",color:active?"#fff":"#8888bb",fontSize:"11px",cursor:"pointer",fontFamily:"monospace"}),
+    input:{width:"100%",background:"#1a1a3e",border:"1px solid #3333aa",borderRadius:"8px",padding:"9px 12px",color:"#e8e8f0",fontSize:"13px",fontFamily:"monospace"},
+    card:(active)=>({background:active?"#1e1e5a":"#1a1a3e",border:`2px solid ${active?"#6666ff":"#2a2a5a"}`,borderRadius:"10px",padding:"10px 6px",cursor:"pointer",textAlign:"center",color:active?"#aaaaff":"#8888bb"}),
+  };
+
+  return (
+    <div style={{minHeight:"100vh",background:"#0f0f1a",color:"#e8e8f0",fontFamily:"monospace",display:"flex",flexDirection:"column"}}>
+      {/* Header */}
+      <div style={S.header}>
+        <div>
+          <div style={{fontSize:"10px",letterSpacing:"3px",color:"#6666aa",textTransform:"uppercase"}}>Assessment Submission</div>
+          <div style={{fontSize:"20px",fontWeight:"700",color:"#fff",margin:"2px 0"}}>Shape Symbol Editor</div>
+          <div style={{fontSize:"11px",color:"#8888bb"}}>16 Symbols · Editable Properties · JSON Export</div>
+        </div>
+        <button onClick={exportJSON} style={{background:"linear-gradient(135deg,#3333aa,#6633cc)",border:"none",borderRadius:"8px",padding:"10px 18px",color:"white",fontSize:"12px",cursor:"pointer",fontFamily:"monospace",fontWeight:"600"}}>↓ Export JSON</button>
+      </div>
+
+      <div style={{display:"flex",flex:1,overflow:"hidden",minHeight:0}}>
+        {/* Left Panel */}
+        <div style={{width:"300px",minWidth:"300px",background:"#12122a",borderRight:"1px solid #2a2a5a",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          <div style={{padding:"12px",borderBottom:"1px solid #2a2a5a"}}>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search shapes..." style={{...S.input,marginBottom:"10px"}}/>
+            <div style={{display:"flex",gap:"5px",flexWrap:"wrap"}}>
+              {CATS.map(c=><button key={c} onClick={()=>setCat(c)} style={S.btn(cat===c)}>{c}</button>)}
+            </div>
+          </div>
+          <div style={{flex:1,overflowY:"auto",padding:"10px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+              {filtered.map(s => {
+                const ri = shapes.findIndex(x=>x.id===s.id);
+                const active = sel===ri;
+                return (
+                  <div key={s.id} onClick={()=>{setSel(ri);setTab("props");}} style={S.card(active)}>
+                    <div style={{color:s.props.color||"#6666ff",width:"55px",height:"55px",margin:"0 auto 5px"}} dangerouslySetInnerHTML={{__html:s.svg}}/>
+                    <div style={{fontSize:"11px",fontWeight:"600",color:active?"#fff":"#ccc"}}>{s.name}</div>
+                    <div style={{fontSize:"9px",color:"#6666aa",marginTop:"1px"}}>{s.cat}</div>
+                    {s.props.tag && <div style={{fontSize:"9px",color:"#4444cc",background:"#0f0f2a",padding:"1px 4px",borderRadius:"4px",marginTop:"2px",display:"inline-block"}}>{s.props.tag}</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel */}
+        <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          {shape ? (
+            <>
+              {/* Tabs */}
+              <div style={{borderBottom:"1px solid #2a2a5a",padding:"0 20px",display:"flex"}}>
+                {["preview","props","json"].map(t=>(
+                  <button key={t} onClick={()=>setTab(t)} style={{background:"none",border:"none",borderBottom:`2px solid ${tab===t?"#6666ff":"transparent"}`,padding:"12px 18px",color:tab===t?"#aaaaff":"#555577",cursor:"pointer",fontFamily:"monospace",fontSize:"11px",textTransform:"uppercase",letterSpacing:"2px"}}>
+                    {t==="preview"?"Preview":t==="props"?"Properties":"JSON"}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
+                {/* PREVIEW */}
+                {tab==="preview" && (
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}}>
+                    <div style={{background:"#1a1a3e",borderRadius:"16px",padding:"40px",border:"1px solid #3333aa"}}>
+                      <div style={{color:shape.props.color||"#6666ff",width:"180px",height:"180px"}} dangerouslySetInnerHTML={{__html:shape.svg}}/>
+                    </div>
+                    <div style={{textAlign:"center"}}>
+                      <div style={{fontSize:"22px",fontWeight:"700",color:"#fff",marginBottom:"6px"}}>{shape.name}</div>
+                      <div style={{fontSize:"13px",color:"#8888bb",marginBottom:"8px"}}>{shape.desc}</div>
+                      <span style={{background:"#2a2a5a",padding:"4px 12px",borderRadius:"20px",fontSize:"11px",color:"#aaaaff"}}>{shape.cat}</span>
+                    </div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",width:"100%",maxWidth:"380px"}}>
+                      {Object.entries(shape.props).filter(([k,v])=>v&&k!=="notes"&&k!=="color").map(([k,v])=>(
+                        <div key={k} style={{background:"#1a1a3e",borderRadius:"8px",padding:"10px",border:"1px solid #2a2a5a"}}>
+                          <div style={{fontSize:"9px",color:"#6666aa",textTransform:"uppercase",letterSpacing:"2px",marginBottom:"3px"}}>{k}</div>
+                          <div style={{fontSize:"13px",color:"#ddf"}}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* PROPERTIES */}
+                {tab==="props" && (
+                  <div style={{maxWidth:"480px"}}>
+                    <div style={{fontSize:"13px",color:"#aaaaff",letterSpacing:"3px",textTransform:"uppercase",marginBottom:"16px"}}>Properties — {shape.name}</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:"14px"}}>
+                      {FIELDS.map(f=>(
+                        <div key={f.key}>
+                          <label style={{display:"block",fontSize:"10px",color:"#8888bb",marginBottom:"5px",letterSpacing:"2px",textTransform:"uppercase"}}>{f.label}</label>
+                          {f.type==="color" ? (
+                            <div style={{display:"flex",gap:"10px",alignItems:"center"}}>
+                              <input type="color" value={shape.props.color||"#6666ff"} onChange={e=>setProp("color",e.target.value)} style={{width:"40px",height:"36px",border:"1px solid #3333aa",borderRadius:"6px",background:"none"}}/>
+                              <span style={{fontSize:"13px",color:"#ccc"}}>{shape.props.color}</span>
+                            </div>
+                          ) : f.type==="select" ? (
+                            <select value={shape.props[f.key]} onChange={e=>setProp(f.key,e.target.value)} style={{...S.input}}>
+                              {f.opts.map(o=><option key={o} value={o}>{o}</option>)}
+                            </select>
+                          ) : f.type==="textarea" ? (
+                            <textarea value={shape.props[f.key]} onChange={e=>setProp(f.key,e.target.value)} placeholder={f.ph} rows={3} style={{...S.input,resize:"vertical"}}/>
+                          ) : (
+                            <input value={shape.props[f.key]} onChange={e=>setProp(f.key,e.target.value)} placeholder={f.ph} style={S.input}/>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={()=>setTab("preview")} style={{marginTop:"20px",background:"linear-gradient(135deg,#3333aa,#6633cc)",border:"none",borderRadius:"8px",padding:"12px",color:"white",fontSize:"13px",cursor:"pointer",fontFamily:"monospace",width:"100%",fontWeight:"600"}}>View Preview →</button>
+                  </div>
+                )}
+
+                {/* JSON */}
+                {tab==="json" && (
+                  <div>
+                    <div style={{fontSize:"13px",color:"#aaaaff",letterSpacing:"3px",textTransform:"uppercase",marginBottom:"16px"}}>JSON — {shape.name}</div>
+                    <pre style={{background:"#0a0a1a",border:"1px solid #2a2a5a",borderRadius:"10px",padding:"18px",fontSize:"12px",color:"#88aaff",overflow:"auto",lineHeight:"1.6"}}>
+                      {JSON.stringify({id:shape.id,name:shape.name,category:shape.cat,description:shape.desc,properties:shape.props},null,2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#4444aa"}}>
+              <div style={{fontSize:"50px",marginBottom:"16px"}}>⬡</div>
+              <div style={{fontSize:"15px",letterSpacing:"2px"}}>Select a Shape to Edit</div>
+              <div style={{fontSize:"11px",marginTop:"6px",color:"#333366"}}>Click any symbol from the left panel</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
